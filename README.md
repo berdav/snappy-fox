@@ -15,6 +15,16 @@ Just compile this application, you will need a C compiler
 sudo apt install make gcc
 ```
 
+Then just compile the application
+```bash
+make
+```
+
+You can add debug prints with
+```bash
+make CFLAGS=DEBUG
+```
+
 ## How?
 
 The usage of the application is pretty simple:
