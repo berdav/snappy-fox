@@ -6,6 +6,11 @@ dependencies.
 Online applications such as whatsapp web (web.whatsapp.com) saves cache
 files (e.g. images) in a compressed way.
 
+You can recognize these files searching for the pattern sNaPpY:
+```bash
+grep 'sNaPpY' ~/.mozilla/firefox/*/storage/default/*/cache/morgue/*/*
+```
+
 This application can help the retrieval of such cache files.
 
 ## Setup
