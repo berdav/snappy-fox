@@ -37,16 +37,40 @@
 #define prbanner(f...) fprintf(stderr, f)
 #define prerror(f...)  fprintf(stderr, "[ ERROR ]"), fprintf(stderr, f)
 
-static uint32_t get_length(uint8_t *data, size_t length, uint32_t *bytes) {
+/* Logaritm base two of the number */
+static uint32_t log2_32(uint32_t n)
+{
+    int32_t i = 0;
+    for (i = 31; i >= 0; --i) {
+        if (n & (1ul<<i))
+            return i + 1;
+    }
+    return 0;
+}
+
+static int check_overflow_shift(uint8_t c, uint32_t shift, uint32_t length) {
+    /* Trivial check */
+    if (c == 0 || shift == 0)
+        return 0;
+
+    /* The right value will overflow the number */
+    if (7*shift + log2_32(c) > 31)
+        return 1;
+
+    return 0;
+}
+
+static uint32_t get_length(uint8_t *data, uint32_t length, uint32_t *bytes) {
     uint32_t l = 0;
     uint32_t shift = 0;
     uint8_t c = 0;
     uint8_t cbit = 1;
     while (cbit != 0) {
-        if (shift > length)
-            return 0;
-
         c = *data;
+
+	/* Return error */
+        if (check_overflow_shift(c, shift, length))
+            return MAX_UNCOMPRESSED_DATA_SIZE + 1;
 
         cbit = c & 0x80;
 
@@ -56,7 +80,6 @@ static uint32_t get_length(uint8_t *data, size_t length, uint32_t *bytes) {
 
         data++;
         shift++;
-        length--;
         (*bytes)++;
     }
     return l;
@@ -456,4 +479,5 @@ exit_point:
 #endif
     return ret;
 }
+
 
