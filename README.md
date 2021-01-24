@@ -1,5 +1,5 @@
 # Snappy-fox
-Snappy-fox is a morgue cache decompressor for Firefox wich do not have
+Snappy-fox is a morgue cache decompressor for Firefox wich does not have
 dependencies.
 
 ## Why?
