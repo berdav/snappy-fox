@@ -38,11 +38,10 @@
 #define prerror(f...)  fprintf(stderr, "[ ERROR ]"), fprintf(stderr, f)
 
 /* Logarithm base two of the number */
-static uint32_t log2_32(uint32_t n)
-{
+static uint32_t log2_32(uint32_t n) {
     int32_t i = 0;
     for (i = 31; i >= 0; --i) {
-        if (n & (1ul<<i))
+        if (n & (1ul << i))
             return i + 1;
     }
     return 0;
@@ -68,7 +67,7 @@ static uint32_t get_length(uint8_t *data, uint32_t length, uint32_t *bytes) {
     while (cbit != 0) {
         c = *data;
 
-	/* Return error */
+        /* Return error */
         if (check_overflow_shift(c, shift, length))
             return MAX_UNCOMPRESSED_DATA_SIZE + 1;
 
