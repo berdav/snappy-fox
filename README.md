@@ -8,7 +8,7 @@ Snappy-fox is a morgue cache decompressor for Firefox which does not have
 dependencies.
 
 ## Why?
-Online applications such as whatsapp web (web.whatsapp.com) saves cache
+Online applications such as whatsapp web (web.whatsapp.com) save cache
 files (e.g. images) in a compressed way.
 
 You can recognize these files searching for the pattern sNaPpY:
@@ -41,7 +41,7 @@ The usage of the application is pretty simple:
 ```bash
 ./snappy-fox <input-file> <output-file>
 ```
-The input or the output files can be `-` to use, respectively stdin and
+The input or the output files can be `-` to use, respectively, stdin and
 stdout.
 
 For instance you can do:
@@ -54,5 +54,5 @@ for f in
 done
 ```
 
-And it will extract all your cache files in the
+it will extract all your cache files in the
 `/tmp/extracted-cache-whatsapp` directory.
