@@ -1,4 +1,4 @@
-# Snappy-fox 🦀
+# Snappy-fox 🦀🦊
 
 <a href="https://github.com/berdav/snappy-fox/blob/master/LICENSE">
 <img alt="GitHub" src="https://img.shields.io/github/license/berdav/snappy-fox.svg?color=blue">
