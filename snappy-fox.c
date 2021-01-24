@@ -421,6 +421,9 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+#ifdef __AFL_LOOP
+    while (__AFL_LOOP(1000)) {
+#endif
     in = open_read_file(argv[1]);
     if (in == NULL) {
         perror("fopen");
@@ -448,6 +451,9 @@ close_in:
         perror("close");
 exit_point:
     prdebug("Exiting %d\n", ret);
+#ifdef __AFL_LOOP
+    }
+#endif
     return ret;
 }
 
