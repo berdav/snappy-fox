@@ -34,7 +34,7 @@ make CFLAGS=DEBUG
 
 The usage of the application is pretty simple:
 ```bash
-$ snappy-fox <input-file> <output-file>
+./snappy-fox <input-file> <output-file>
 ```
 The input or the output files can be `-` to use, respectively stdin and
 stdout.
@@ -45,7 +45,7 @@ mkdir /tmp/extracted-cache-whatsapp
 for f in
   find ~/.mozilla/firefox/**/storage/default/https+++web.whatsapp.com/cache/ -name '*.final';
   do
-    snappy-fox "$f" "/tmp/extracted-cache-whatsapp/$(basename $f)"
+    ./snappy-fox "$f" "/tmp/extracted-cache-whatsapp/$(basename $f)"
 done
 ```
 
