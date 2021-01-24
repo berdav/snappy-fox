@@ -37,7 +37,7 @@
 #define prbanner(f...) fprintf(stderr, f)
 #define prerror(f...)  fprintf(stderr, "[ ERROR ]"), fprintf(stderr, f)
 
-/* Logaritm base two of the number */
+/* Logarithm base two of the number */
 static uint32_t log2_32(uint32_t n)
 {
     int32_t i = 0;
