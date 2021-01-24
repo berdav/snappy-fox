@@ -1,9 +1,10 @@
-# Snappy-fox
+# Snappy-fox 🦀
 
 <a href="https://github.com/berdav/snappy-fox/blob/master/LICENSE">
 <img alt="GitHub" src="https://img.shields.io/github/license/berdav/snappy-fox.svg?color=blue">
 </a>
-🦀 Snappy-fox is a morgue cache decompressor for Firefox which does not have
+
+Snappy-fox is a morgue cache decompressor for Firefox which does not have
 dependencies.
 
 ## Why?
