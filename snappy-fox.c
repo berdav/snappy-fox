@@ -111,8 +111,11 @@ static int32_t parse_literal(uint8_t *cdata, uint32_t cidx, uint32_t clength,
         return -1;
     lenval = (int32_t)lenval_u;
 
+    if (*idx > length || clen > length)
+        return -1;
+
     if (*idx + clen > length)
-        return -9;
+        return -1;
 
     prdebug("Copying literal %d bytes at (u:%d c:%d (%lu))\n",
             clen, *idx, offsetval, offsetval);
