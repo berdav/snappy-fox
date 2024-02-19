@@ -45,6 +45,10 @@
 /* Flags */
 /* Unframed file stream, by default assume framed file */
 static uint32_t unframed_stream = 0;
+/* Ignore offset errors, by default consider them as fatal errors*/
+static uint32_t ignore_offset_errors = 0;
+/* Byte to substitute offset corrupted values with */
+static uint8_t offset_dummy_byte = 0xff;
 
 /* Logarithm base two of the number */
 static uint32_t log2_32(uint32_t n) {
@@ -137,18 +141,28 @@ static int32_t parse_literal(uint8_t *cdata, uint32_t cidx, uint32_t clength,
 
 static int offsetread(uint8_t *data, uint32_t *idx, uint32_t length,
               uint32_t clen, uint32_t coff) {
+    int ret = 0;
     uint32_t i;
     prdebug("Copying %d bytes offset %d (pos: %d)\n",
             clen, coff, *idx);
 
     /* Ignore invalid offset */
     if (*idx < coff || coff == 0)
-        return -1;
+        ret = -1;
 
     if (*idx + clen > length)
-        return -1;
+        ret = -1;
 
-    if (coff >= clen) {
+    /* Check if we can ignore errors */
+    if (ret != 0 && !ignore_offset_errors) {
+        prerror("Offset error\n");
+    } else if (ret != 0 && ignore_offset_errors) {
+        prinfo("Ignoring offset errors\n");
+        for (i = 0; i < clen; ++i)
+            data[*idx+i] = offset_dummy_byte;
+        *idx = *idx + clen;
+        ret = 0;
+    } else if (coff >= clen) {
         memcpy(&data[*idx], &data[*idx - coff], clen);
         *idx += clen;
     } else {
@@ -159,7 +173,7 @@ static int offsetread(uint8_t *data, uint32_t *idx, uint32_t length,
         memcpy(&data[*idx], &data[*idx - coff], clen % coff);
         *idx += clen % coff;
     }
-    return 0;
+    return ret;
 }
 
 
@@ -273,6 +287,7 @@ static FILE *open_read_file(const char *file) {
     FILE *in = stdin;
     if (strcmp(file, "-") != 0)
         in = fopen(file, "rb");
+    prdebug("Opening IN file: %s\n", file);
     return in;
 }
 
@@ -280,6 +295,7 @@ static FILE *open_write_file(const char *file) {
     FILE *out = stdout;
     if (strcmp(file, "-") != 0)
         out = fopen(file, "wb");
+    prdebug("Opening OUT file: %s\n", file);
     return out;
 }
 
@@ -503,9 +519,10 @@ static void usage(const char *progname) {
 		    progname);
     fprintf(stderr, "  files can be specified as - for stdin or stdout\n");
     fprintf(stderr, "  Options:\n");
-    fprintf(stderr, "    -u --unframed Assume Unframed stream in input file\n");
-    fprintf(stderr, "    -h --help     This Help\n");
-    fprintf(stderr, "    -v --version  Print Version and exit\n");
+    fprintf(stderr, "    -E --ignore_offset_errors [substitution byte] Ignore any offset errors that occurs\n");
+    fprintf(stderr, "    -u --unframed             Assume Unframed stream in input file\n");
+    fprintf(stderr, "    -h --help                 This Help\n");
+    fprintf(stderr, "    -v --version              Print Version and exit\n");
 }
 
 int main(int argc, char **argv) {
@@ -515,15 +532,22 @@ int main(int argc, char **argv) {
 
     int option_idx = 0;
     static struct option flags[] = {
-        {"unframed", no_argument, 0, 'u'},
-        {"version",  no_argument, 0, 'v'},
-        {"help",     no_argument, 0, 'h'},
-        {0,          0,           0, 0}
+        {"ignore_offset_errors", optional_argument, 0, 'E'},
+        {"unframed",             no_argument,       0, 'u'},
+        {"version",              no_argument,       0, 'v'},
+        {"help",                 no_argument,       0, 'h'},
+        {0,                      0,                 0, 0}
     };
 
     while (c != -1) {
-        c = getopt_long(argc, argv, "hv", flags, &option_idx);
+        c = getopt_long(argc, argv, "E?uhv", flags, &option_idx);
         switch (c) {
+            case 'E':
+                ignore_offset_errors = 1;
+                /* Set the dummy byte to the passed value */
+                if (optarg != NULL)
+                    offset_dummy_byte = (strtol(optarg, NULL, 0) & 0xff);
+                break;
             case 'u':
                 unframed_stream = 1;
                 break;
@@ -543,7 +567,7 @@ int main(int argc, char **argv) {
 
     prdebug("Starting snappy-fox\n");
 
-    if (argc - option_idx < 2) {
+    if (argc - optind < 2) {
         usage(argv[0]);
         return 1;
     }
@@ -551,14 +575,14 @@ int main(int argc, char **argv) {
 #ifdef __AFL_LOOP
     while (__AFL_LOOP(1000)) {
 #endif
-    in = open_read_file(argv[option_idx]);
+    in = open_read_file(argv[optind]);
     if (in == NULL) {
         perror("fopen read");
         ret = 1;
         goto exit_point;
     }
 
-    out = open_write_file(argv[option_idx+1]);
+    out = open_write_file(argv[optind + 1]);
     if (out == NULL) {
         perror("fopen write");
         ret = 1;
