@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <getopt.h>
 
 #define MAX_COMPRESSED_DATA_SIZE   16777211
 #define MAX_UNCOMPRESSED_DATA_SIZE 65536
@@ -36,6 +37,10 @@
 #endif
 #define prbanner(f...) fprintf(stderr, f)
 #define prerror(f...)  fprintf(stderr, "[ ERROR ]"), fprintf(stderr, f)
+
+#ifndef VERSION
+#define VERSION "unknown"
+#endif
 
 /* Logarithm base two of the number */
 static uint32_t log2_32(uint32_t n) {
@@ -430,18 +435,51 @@ static int snappy_decompress_frame(FILE *in, FILE *out) {
     return ret;
 }
 
+static void version(const char *progname) {
+    fprintf(stderr, "%s Version: %s\n", progname, VERSION);
+}
+
 static void usage(const char *progname) {
-    fprintf(stderr, "Usage %s <input file> <output file>\n", progname);
+    fprintf(stderr, "Usage %s [options] <input file> <output file>\n",
+		    progname);
     fprintf(stderr, "  files can be specified as - for stdin or stdout\n");
+    fprintf(stderr, "  Options:\n");
+    fprintf(stderr, "    -h --help     This Help\n");
+    fprintf(stderr, "    -v --version  Print Version and exit\n");
 }
 
 int main(int argc, char **argv) {
+    int c;
     int ret = 0;
     FILE *in, *out;
 
+    int option_idx = 0;
+    static struct option flags[] = {
+        {"version", no_argument, 0, 'v'},
+        {"help",    no_argument, 0, 'h'},
+        {0,         0,           0, 0}
+    };
+
+    while (c != -1) {
+        c = getopt_long(argc, argv, "hv", flags, &option_idx);
+        switch (c) {
+            case 'h':
+                usage(argv[0]);
+                return 0;
+            case 'v':
+                version(argv[0]);
+                return 0;
+            default:
+                prerror("Unknown Option: %c\n", c);
+                continue;
+            case -1:
+                break;
+	}
+    }
+
     prdebug("Starting snappyturtle\n");
 
-    if (argc < 3) {
+    if (option_idx + argc < 3) {
         usage(argv[0]);
         return 1;
     }
@@ -449,14 +487,14 @@ int main(int argc, char **argv) {
 #ifdef __AFL_LOOP
     while (__AFL_LOOP(1000)) {
 #endif
-    in = open_read_file(argv[1]);
+    in = open_read_file(argv[option_idx+1]);
     if (in == NULL) {
         perror("fopen");
         ret = 1;
         goto exit_point;
     }
 
-    out = open_write_file(argv[2]);
+    out = open_write_file(argv[option_idx+2]);
     if (out == NULL) {
         perror("fopen");
         ret = 1;
