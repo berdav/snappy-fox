@@ -16,9 +16,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Run tests
+        working-directory: ./test
         run: |
-          cd test
-          bash run-test.sh
+          bash run-tests.sh
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
