@@ -1,0 +1,27 @@
+name: Test and release application
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+
+jobs:
+  test-application:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install prerequisites
+        run: |
+          sudo apt-get -y build-essential
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Run tests
+        working-directory: ./test
+        run: |
+          bash run-test.sh
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          title: "snappy-fox"
+          files: |
+            snappy-fox
