@@ -42,6 +42,10 @@
 #define VERSION "unknown"
 #endif
 
+/* Flags */
+/* Unframed file stream, by default assume framed file */
+static uint32_t unframed_stream = 0;
+
 /* Logarithm base two of the number */
 static uint32_t log2_32(uint32_t n) {
     int32_t i = 0;
@@ -422,7 +426,62 @@ static int parse_chunk(FILE *in, FILE *out, uint8_t chunktype) {
     }
 }
 
-static int snappy_decompress_frame(FILE *in, FILE *out) {
+static int snappy_decompress_unframed(FILE *in, FILE *out) {
+    int ret = 0;
+    int32_t r = 0;
+    uint32_t read_head = 0;
+    uint32_t write_head = 0;
+
+    uint8_t *inbuf, *outbuf;
+
+    int32_t read_size = MAX_COMPRESSED_DATA_SIZE;
+    int32_t write_size = MAX_COMPRESSED_DATA_SIZE;
+
+    inbuf = malloc(read_size);
+    if (inbuf == NULL) {
+        ret = -1;
+        goto return_point;
+    }
+
+    outbuf = malloc(write_size);
+    if (outbuf == NULL) {
+        ret = -1;
+        goto free_in;
+    }
+
+    read_size = fread(inbuf, 1, read_size, in);
+    if (read_size <= 0) {
+        ret = read_size;
+        goto free_out;
+    }
+
+    while (read_head < read_size) {
+        /* Skip unvalid compressed types, sledge */
+        uint8_t ctype = inbuf[read_head] & 0x03;
+        r = parse_compressed_type(ctype, inbuf, read_head, read_size,
+                                  outbuf, &write_head, write_size);
+        if (r < 0) {
+            prerror("parse_compressed_type: %d\n", r);
+            return r;
+        }
+
+        read_head += r;
+        prinfo("offset: %u\n", read_head);
+    }
+
+    r = fwrite(outbuf, 1, write_head, out);
+    if (r < 0)
+        ret = r;
+
+free_out:
+    free(outbuf);
+free_in:
+    free(inbuf);
+return_point:
+    return ret;
+}
+
+static int snappy_decompress_framed(FILE *in, FILE *out) {
     int ret = 0;
     uint8_t chunktype;
 
@@ -444,6 +503,7 @@ static void usage(const char *progname) {
 		    progname);
     fprintf(stderr, "  files can be specified as - for stdin or stdout\n");
     fprintf(stderr, "  Options:\n");
+    fprintf(stderr, "    -u --unframed Assume Unframed stream in input file\n");
     fprintf(stderr, "    -h --help     This Help\n");
     fprintf(stderr, "    -v --version  Print Version and exit\n");
 }
@@ -455,14 +515,18 @@ int main(int argc, char **argv) {
 
     int option_idx = 0;
     static struct option flags[] = {
-        {"version", no_argument, 0, 'v'},
-        {"help",    no_argument, 0, 'h'},
-        {0,         0,           0, 0}
+        {"unframed", no_argument, 0, 'u'},
+        {"version",  no_argument, 0, 'v'},
+        {"help",     no_argument, 0, 'h'},
+        {0,          0,           0, 0}
     };
 
     while (c != -1) {
         c = getopt_long(argc, argv, "hv", flags, &option_idx);
         switch (c) {
+            case 'u':
+                unframed_stream = 1;
+                break;
             case 'h':
                 usage(argv[0]);
                 return 0;
@@ -479,7 +543,7 @@ int main(int argc, char **argv) {
 
     prdebug("Starting snappy-fox\n");
 
-    if (option_idx + argc < 3) {
+    if (argc - option_idx < 2) {
         usage(argv[0]);
         return 1;
     }
@@ -487,21 +551,26 @@ int main(int argc, char **argv) {
 #ifdef __AFL_LOOP
     while (__AFL_LOOP(1000)) {
 #endif
-    in = open_read_file(argv[option_idx+1]);
+    in = open_read_file(argv[option_idx]);
     if (in == NULL) {
-        perror("fopen");
+        perror("fopen read");
         ret = 1;
         goto exit_point;
     }
 
-    out = open_write_file(argv[option_idx+2]);
+    out = open_write_file(argv[option_idx+1]);
     if (out == NULL) {
-        perror("fopen");
+        perror("fopen write");
         ret = 1;
         goto close_in;
     }
 
-    if ((ret = snappy_decompress_frame(in, out)) != 0) {
+    if (unframed_stream == 0)
+        ret = snappy_decompress_framed(in, out);
+    else
+        ret = snappy_decompress_unframed(in, out);
+
+    if (ret != 0) {
         prerror("decompress %d\n", ret);
         goto return_point;
     }
