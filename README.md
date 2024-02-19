@@ -4,8 +4,9 @@
 <img alt="GitHub" src="https://img.shields.io/github/license/berdav/snappy-fox.svg?color=blue">
 </a>
 
-Snappy-fox is a morgue cache decompressor for Firefox which does not have
-dependencies.
+Snappy-fox is a Snappy file decompressor (i.e. morgue cache of Firefox)
+which does not have dependencies. It can also reconstruct corrupted
+files.
 
 ## Why?
 Online applications such as whatsapp web (web.whatsapp.com) save cache
@@ -56,3 +57,22 @@ done
 
 it will extract all your cache files in the
 `/tmp/extracted-cache-whatsapp` directory.
+
+## Example
+
+You can try the application with the example image present in the
+example directory:
+```bash
+./snappy-fox example/exampleimage.snappy example/exampleimage.jpg
+```
+
+![example image](https://github.com/berdav/snappy-fox/blob/staging/example/exampleimage.jpg?raw=true)
+
+`alteredimage.snappy` is a corrupted version of the image, you can see
+the retrival performance of the tool using:
+```bash
+./snappy-fox --ignore_offset_errors example/alteredimage.snappy example/alteredimage.jpg
+```
+
+![altered image](https://github.com/berdav/snappy-fox/blob/staging/example/alteredimage.jpg?raw=true)
+
