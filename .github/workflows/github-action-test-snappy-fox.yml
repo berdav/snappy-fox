@@ -1,8 +1,6 @@
 name: Test and release application
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*'
 
