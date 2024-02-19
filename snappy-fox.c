@@ -636,7 +636,7 @@ static void usage(const char *progname) {
 }
 
 int main(int argc, char **argv) {
-    int c;
+    int c = 0;
     int ret = 0;
     FILE *in, *out;
 
