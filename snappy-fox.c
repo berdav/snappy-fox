@@ -49,6 +49,8 @@ static uint32_t unframed_stream = 0;
 static uint32_t ignore_offset_errors = 0;
 /* Byte to substitute offset corrupted values with */
 static uint8_t offset_dummy_byte = 0xff;
+/* Read offset */
+static uint32_t read_offset = 0;
 
 /* Logarithm base two of the number */
 static uint32_t log2_32(uint32_t n) {
@@ -288,6 +290,13 @@ static FILE *open_read_file(const char *file) {
     if (strcmp(file, "-") != 0)
         in = fopen(file, "rb");
     prdebug("Opening IN file: %s\n", file);
+    if (in == NULL)
+        return in;
+
+    if (read_offset != 0) {
+        prinfo("Seeking to offset %d\n", read_offset);
+        fseek(in, read_offset, SEEK_SET);
+    }
     return in;
 }
 
@@ -520,9 +529,10 @@ static void usage(const char *progname) {
     fprintf(stderr, "  files can be specified as - for stdin or stdout\n");
     fprintf(stderr, "  Options:\n");
     fprintf(stderr, "    -E --ignore_offset_errors [substitution byte] Ignore any offset errors that occurs\n");
-    fprintf(stderr, "    -u --unframed             Assume Unframed stream in input file\n");
-    fprintf(stderr, "    -h --help                 This Help\n");
-    fprintf(stderr, "    -v --version              Print Version and exit\n");
+    fprintf(stderr, "    -O --read_offset [offset]                     Start reading file from offset\n");
+    fprintf(stderr, "    -u --unframed                                 Assume Unframed stream in input file\n");
+    fprintf(stderr, "    -h --help                                     This Help\n");
+    fprintf(stderr, "    -v --version                                  Print Version and exit\n");
 }
 
 int main(int argc, char **argv) {
@@ -533,6 +543,7 @@ int main(int argc, char **argv) {
     int option_idx = 0;
     static struct option flags[] = {
         {"ignore_offset_errors", optional_argument, 0, 'E'},
+        {"read_offset",          required_argument, 0, 'O'},
         {"unframed",             no_argument,       0, 'u'},
         {"version",              no_argument,       0, 'v'},
         {"help",                 no_argument,       0, 'h'},
@@ -540,13 +551,17 @@ int main(int argc, char **argv) {
     };
 
     while (c != -1) {
-        c = getopt_long(argc, argv, "E?uhv", flags, &option_idx);
+        c = getopt_long(argc, argv, "O:E::uhv", flags, &option_idx);
         switch (c) {
             case 'E':
                 ignore_offset_errors = 1;
                 /* Set the dummy byte to the passed value */
                 if (optarg != NULL)
                     offset_dummy_byte = (strtol(optarg, NULL, 0) & 0xff);
+                break;
+            case 'O':
+                if (optarg != NULL)
+                    read_offset = strtol(optarg, NULL, 0);
                 break;
             case 'u':
                 unframed_stream = 1;
