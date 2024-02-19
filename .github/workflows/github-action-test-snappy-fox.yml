@@ -11,12 +11,15 @@ jobs:
       - name: Install prerequisites
         run: |
           sudo apt-get -y install build-essential
+
       - name: Check out repository code
         uses: actions/checkout@v2
+
       - name: Run tests
         working-directory: ./test
         run: |
           bash run-tests.sh
+
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
