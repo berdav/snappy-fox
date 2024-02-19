@@ -692,7 +692,7 @@ int main(int argc, char **argv) {
     }
 
 #ifdef __AFL_LOOP
-    while (__AFL_LOOP(1000)) {
+    while (__AFL_LOOP(UINT32_MAX)) {
 #endif
     in = open_read_file(argv[optind]);
     if (in == NULL) {
@@ -700,6 +700,10 @@ int main(int argc, char **argv) {
         ret = 1;
         goto exit_point;
     }
+
+#ifdef __AFL_LOOP
+    ftell(in);
+#endif
 
     out = open_write_file(argv[optind + 1]);
     if (out == NULL) {
