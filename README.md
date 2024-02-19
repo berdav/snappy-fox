@@ -66,7 +66,7 @@ example directory:
 ./snappy-fox example/exampleimage.snappy example/exampleimage.jpg
 ```
 
-![example image](https://github.com/berdav/snappy-fox/blob/staging/example/exampleimage.jpg?raw=true)
+![example image](https://github.com/berdav/snappy-fox/blob/master/example/exampleimage.jpg?raw=true)
 
 `alteredimage.snappy` is a corrupted version of the image, you can see
 the retrival performance of the tool using:
@@ -74,5 +74,5 @@ the retrival performance of the tool using:
 ./snappy-fox --ignore_offset_errors example/alteredimage.snappy example/alteredimage.jpg
 ```
 
-![altered image](https://github.com/berdav/snappy-fox/blob/staging/example/alteredimage.jpg?raw=true)
+![altered image](https://github.com/berdav/snappy-fox/blob/master/example/alteredimage.jpg?raw=true)
 
