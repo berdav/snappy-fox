@@ -53,6 +53,8 @@ static uint8_t offset_dummy_byte = 0xff;
 static uint32_t read_offset = 0;
 /* Consider CRC Errors */
 static uint32_t consider_crc_errors = 0;
+/* Use Firefox CRC32 implementation */
+static uint32_t firefox_crc = 0;
 
 /* CRC related functions */
 static const uint32_t crc32c_table[] = {
@@ -124,13 +126,16 @@ static void crc32c(uint32_t *crc, const uint8_t *data, size_t len)
 }
 
 static void crc32c_init(uint32_t *crc) {
-	/* Initial value is 0 */
+	/* Initial value of CRC */
 	*crc = 0xffffffff;
 }
 
 static void crc32c_fini(uint32_t *crc) {
-	/* Final step is to reverse the CRC Value */
-	*crc ^= 0xffffffff;
+	/* Firefox uses unreversed CRCs */
+	if (!firefox_crc) {
+		/* Final step is to reverse the CRC Value */
+		*crc ^= 0xffffffff;
+	}
 	/* Mask the CRC */
 	*crc = ((*crc >> 15) | (*crc << 17)) + 0xa282ead8;
 }
@@ -628,8 +633,10 @@ static void usage(const char *progname) {
 		    progname);
     fprintf(stderr, "  files can be specified as - for stdin or stdout\n");
     fprintf(stderr, "  Options:\n");
+    fprintf(stderr, "    -C --consider_crc_errors                      Consider CRC errors as fatal\n");
     fprintf(stderr, "    -E --ignore_offset_errors [substitution byte] Ignore any offset errors that occurs\n");
     fprintf(stderr, "    -O --read_offset [offset]                     Start reading file from offset\n");
+    fprintf(stderr, "    -f --firefox                                  Use firefox's CRC algorithm\n");
     fprintf(stderr, "    -u --unframed                                 Assume Unframed stream in input file\n");
     fprintf(stderr, "    -h --help                                     This Help\n");
     fprintf(stderr, "    -v --version                                  Print Version and exit\n");
@@ -645,6 +652,7 @@ int main(int argc, char **argv) {
         {"consider_crc_errors",  no_argument,       0, 'C'},
         {"ignore_offset_errors", optional_argument, 0, 'E'},
         {"read_offset",          required_argument, 0, 'O'},
+        {"firefox",              no_argument,       0, 'f'},
         {"unframed",             no_argument,       0, 'u'},
         {"version",              no_argument,       0, 'v'},
         {"help",                 no_argument,       0, 'h'},
@@ -652,7 +660,7 @@ int main(int argc, char **argv) {
     };
 
     while (c != -1) {
-        c = getopt_long(argc, argv, "CO:E::uhv", flags, &option_idx);
+        c = getopt_long(argc, argv, "CO:E::fuhv", flags, &option_idx);
         switch (c) {
             case 'C':
                 consider_crc_errors = 1;
@@ -666,6 +674,9 @@ int main(int argc, char **argv) {
             case 'O':
                 if (optarg != NULL)
                     read_offset = strtol(optarg, NULL, 0);
+                break;
+            case 'f':
+                firefox_crc = 1;
                 break;
             case 'u':
                 unframed_stream = 1;
@@ -681,7 +692,7 @@ int main(int argc, char **argv) {
                 continue;
             case -1:
                 break;
-	}
+        }
     }
 
     prdebug("Starting snappy-fox\n");

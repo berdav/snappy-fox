@@ -1,4 +1,4 @@
-CFLAGS+=-Wall -Werror -DVERSION='"v0.2.3"'
+CFLAGS+=-Wall -Werror -DVERSION='"v0.3.0"'
 TARGET=snappy-fox
 
 .PHONY: all

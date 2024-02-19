@@ -22,9 +22,13 @@ test001() {
 	./snappy-fox example/exampleimage.snappy example/exampleimage.jpg
 	file example/exampleimage.jpg | grep -q JPEG
 
-	# The example image is CRC corrupted
+	# The example image is CRC corrupted (it uses firefox CRCs)
 	echo "[Test 001 b] CRC Corruption"
 	! ./snappy-fox --consider_crc_errors  \
+		example/exampleimage.snappy example/exampleimage.jpg
+
+	echo "[Test 001 b] Firefox CRC Test"
+	./snappy-fox --consider_crc_errors --firefox \
 		example/exampleimage.snappy example/exampleimage.jpg
 
 	# Test on the corrupted image
