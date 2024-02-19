@@ -33,7 +33,7 @@ make
 
 You can add debug prints with
 ```bash
-make CFLAGS=DEBUG
+make CFLAGS=-DDEBUG
 ```
 
 ## How?
