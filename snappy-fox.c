@@ -477,7 +477,7 @@ int main(int argc, char **argv) {
 	}
     }
 
-    prdebug("Starting snappyturtle\n");
+    prdebug("Starting snappy-fox\n");
 
     if (option_idx + argc < 3) {
         usage(argv[0]);
