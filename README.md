@@ -8,6 +8,17 @@ Snappy-fox is a Snappy file decompressor (i.e. morgue cache of Firefox)
 which does not have dependencies. It can also reconstruct corrupted
 files.
 
+
+## It worked! I want to thank you
+Thank you so much. This software is obviously free of charge and developed in my free time.
+If you want to say thanks you can use the following Paypal link or Cryptocurrencies addresses:
+
+[![paypal](https://github.com/Ximi1970/Donate/blob/master/paypal_btn_donateCC_LG_1.gif)](https://www.paypal.c
+om/donate/?business=3D84NRYJNR4TQ&no_recurring=0&item_name=Thank+you+for+using+my+software%21&currency_code=E
+UR)
+
+ETH Address: `0x9Ed7E2e0451D489c8A526b2Ae86c13a1453A0E39`
+
 ## Why?
 Online applications such as whatsapp web (web.whatsapp.com) save cache
 files (e.g. images) in a compressed way.
