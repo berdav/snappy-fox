@@ -38,6 +38,12 @@ test001() {
 	echo "[Test 001 c] Corrupted image ignoring offset errors"
 	./snappy-fox --ignore_offset_errors \
 		example/alteredimage.snappy example/alteredimage.jpg
+	echo "[Test 001 c] Corrupted metadata image"
+	! ./snappy-fox \
+		example/nomagic.snappy example/nomagic.jpg
+	echo "[Test 001 c] Corrupted metadata image ignoring magic"
+	./snappy-fox --ignore_magic \
+		example/nomagic.snappy example/nomagic.jpg
 	echo "[Test 001  ] ok"
 }
 

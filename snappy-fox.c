@@ -49,6 +49,8 @@ static uint32_t unframed_stream = 0;
 static uint32_t ignore_offset_errors = 0;
 /* Byte to substitute offset corrupted values with */
 static uint8_t offset_dummy_byte = 0xff;
+/* Ignore altered magic bytes (sNaPpY) */
+static uint32_t ignore_magic = 0;
 /* Read offset */
 static uint32_t read_offset = 0;
 /* Consider CRC Errors */
@@ -428,7 +430,7 @@ static int parse_stream_identifier(FILE *in) {
     if (fread(stream_identifier, 9, 1, in) < 1)
         return -1;
 
-    if (memcmp(reference_identifier, stream_identifier, 9) != 0)
+    if (memcmp(reference_identifier, stream_identifier, 9) != 0 && !ignore_magic)
         return -1;
 
     return 0;
@@ -635,6 +637,7 @@ static void usage(const char *progname) {
     fprintf(stderr, "  Options:\n");
     fprintf(stderr, "    -C --consider_crc_errors                      Consider CRC errors as fatal\n");
     fprintf(stderr, "    -E --ignore_offset_errors [substitution byte] Ignore any offset errors that occurs\n");
+    fprintf(stderr, "    -M --ignore_magic                             Ignore altered magic bytes (sNaPpY)\n");
     fprintf(stderr, "    -O --read_offset [offset]                     Start reading file from offset\n");
     fprintf(stderr, "    -f --firefox                                  Use firefox's CRC algorithm\n");
     fprintf(stderr, "    -u --unframed                                 Assume Unframed stream in input file\n");
@@ -651,6 +654,7 @@ int main(int argc, char **argv) {
     static struct option flags[] = {
         {"consider_crc_errors",  no_argument,       0, 'C'},
         {"ignore_offset_errors", optional_argument, 0, 'E'},
+        {"ignore_magic",         no_argument,       0, 'M'},
         {"read_offset",          required_argument, 0, 'O'},
         {"firefox",              no_argument,       0, 'f'},
         {"unframed",             no_argument,       0, 'u'},
@@ -670,6 +674,9 @@ int main(int argc, char **argv) {
                 /* Set the dummy byte to the passed value */
                 if (optarg != NULL)
                     offset_dummy_byte = (strtol(optarg, NULL, 0) & 0xff);
+                break;
+            case 'M':
+                ignore_magic = 1;
                 break;
             case 'O':
                 if (optarg != NULL)
