@@ -4,6 +4,6 @@ TARGET=snappy-fox
 .PHONY: all
 all: $(TARGET)
 
-.PHONY: clear
+.PHONY: clean
 clean:
 	rm -f $(TARGET)

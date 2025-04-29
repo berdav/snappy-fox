@@ -45,7 +45,7 @@
 /* Flags */
 /* Unframed file stream, by default assume framed file */
 static uint32_t unframed_stream = 0;
-/* Ignore offset errors, by default consider them as fatal errors*/
+/* Ignore offset errors, by default consider them as fatal errors */
 static uint32_t ignore_offset_errors = 0;
 /* Byte to substitute offset corrupted values with */
 static uint8_t offset_dummy_byte = 0xff;
