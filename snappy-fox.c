@@ -664,7 +664,7 @@ int main(int argc, char **argv) {
     };
 
     while (c != -1) {
-        c = getopt_long(argc, argv, "CO:E::fuhv", flags, &option_idx);
+        c = getopt_long(argc, argv, "CO:ME::fuhv", flags, &option_idx);
         switch (c) {
             case 'C':
                 consider_crc_errors = 1;
